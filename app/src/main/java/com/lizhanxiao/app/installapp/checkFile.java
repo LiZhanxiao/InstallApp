@@ -19,10 +19,11 @@ import java.io.File;
 import java.util.List;
 
 public class checkFile extends Service {
-    private final String SDPATH  = Environment.getExternalStorageDirectory()+File.separator;
-    private final String PATH_FILE = SDPATH+"Download"+File.separator+"apps";
+    private final String SDPATH = Environment.getExternalStorageDirectory() + File.separator;
+    private final String PATH_FILE = SDPATH + "Download" + File.separator + "apps";
     private final String INSTALLDATE = "installDate";
-    private final String appName = "KLXT";
+//    private final String appName = "KLXT";
+
     public checkFile() {
 
     }
@@ -30,8 +31,8 @@ public class checkFile extends Service {
     /**
      * 每1分钟更新一次数据
      */
-    private static final int ONE_Miniute=3*1000;
-    private static final int PENDING_REQUEST=0;
+    private static final int ONE_Miniute = 3 * 1000;
+    private static final int PENDING_REQUEST = 0;
 
 
     /**
@@ -45,23 +46,21 @@ public class checkFile extends Service {
             @Override
             public void run() {
                 if (FileUtils.createOrExistsDir(PATH_FILE)) {
-                    List<File> files  = FileUtils.listFilesInDir(PATH_FILE);
+                    List<File> files = FileUtils.listFilesInDir(PATH_FILE);
                     for (File file : files) {
-                        if (file.getName().contains(appName)){
-                            long newDate = FileUtils.getFileLastModified(file);
-                            if (SPUtils.getInstance().contains(INSTALLDATE)) {
-                                long oldDate =  SPUtils.getInstance().getLong(INSTALLDATE);
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                                    if (Long.compare(oldDate,newDate) !=0) {
+                        long newDate = FileUtils.getFileLastModified(file);
+                        if (SPUtils.getInstance().contains(INSTALLDATE)) {
+                            long oldDate = SPUtils.getInstance().getLong(INSTALLDATE);
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                                if (Long.compare(oldDate, newDate) != 0) {
 
-                                        AppUtils.installApp(file);
-                                        SPUtils.getInstance().put(INSTALLDATE,newDate);
-                                    }
+                                    AppUtils.installApp(file);
+                                    SPUtils.getInstance().put(INSTALLDATE, newDate);
                                 }
-                            }else {
-                                AppUtils.installApp(file);
-                                SPUtils.getInstance().put(INSTALLDATE,newDate);
                             }
+                        } else {
+                            AppUtils.installApp(file);
+                            SPUtils.getInstance().put(INSTALLDATE, newDate);
                         }
                     }
                 }
@@ -69,11 +68,11 @@ public class checkFile extends Service {
         }).start();
 
         //通过AlarmManager定时启动广播
-        AlarmManager alarmManager= (AlarmManager) getSystemService(ALARM_SERVICE);
-        long triggerAtTime= SystemClock.elapsedRealtime()+ONE_Miniute;//从开机到现在的毫秒书（手机睡眠(sleep)的时间也包括在内
-        Intent i=new Intent(this, AlarmReceive.class);
-        PendingIntent pIntent=PendingIntent.getBroadcast(this,PENDING_REQUEST,i,PENDING_REQUEST);
-        alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,triggerAtTime,pIntent);
+        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        long triggerAtTime = SystemClock.elapsedRealtime() + ONE_Miniute;//从开机到现在的毫秒书（手机睡眠(sleep)的时间也包括在内
+        Intent i = new Intent(this, AlarmReceive.class);
+        PendingIntent pIntent = PendingIntent.getBroadcast(this, PENDING_REQUEST, i, PENDING_REQUEST);
+        alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtTime, pIntent);
 
         return super.onStartCommand(intent, flags, startId);
     }
