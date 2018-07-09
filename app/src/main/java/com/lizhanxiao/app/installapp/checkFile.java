@@ -21,8 +21,6 @@ import java.util.List;
 public class checkFile extends Service {
     private final String SDPATH = Environment.getExternalStorageDirectory() + File.separator;
     private final String PATH_FILE = SDPATH + "Download" + File.separator + "apps";
-    private final String INSTALLDATE = "installDate";
-//    private final String appName = "KLXT";
 
     public checkFile() {
 
@@ -40,7 +38,6 @@ public class checkFile extends Service {
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
         //这里模拟后台操作
         new Thread(new Runnable() {
             @Override
@@ -49,18 +46,18 @@ public class checkFile extends Service {
                     List<File> files = FileUtils.listFilesInDir(PATH_FILE);
                     for (File file : files) {
                         long newDate = FileUtils.getFileLastModified(file);
-                        if (SPUtils.getInstance().contains(INSTALLDATE)) {
-                            long oldDate = SPUtils.getInstance().getLong(INSTALLDATE);
+                        String fileName = FileUtils.getFileNameNoExtension(file);
+                        if (SPUtils.getInstance().contains(fileName)) {
+                            long oldDate = SPUtils.getInstance().getLong(fileName);
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                                 if (Long.compare(oldDate, newDate) != 0) {
-
                                     AppUtils.installApp(file);
-                                    SPUtils.getInstance().put(INSTALLDATE, newDate);
+                                    SPUtils.getInstance().put(fileName, newDate);
                                 }
                             }
                         } else {
                             AppUtils.installApp(file);
-                            SPUtils.getInstance().put(INSTALLDATE, newDate);
+                            SPUtils.getInstance().put(fileName, newDate);
                         }
                     }
                 }
